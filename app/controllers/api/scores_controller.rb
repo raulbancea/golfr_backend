@@ -18,8 +18,10 @@ module Api
     def golfers
       user_id = params[:id].to_i
       scores = Score.where(user_id: user_id).includes(:user).order(played_at: :desc, id: :desc)
+
       serialized_scores = scores.map(&:serialize)
       response = { scores: serialized_scores }
+
       render json: response.to_json
     end
 
