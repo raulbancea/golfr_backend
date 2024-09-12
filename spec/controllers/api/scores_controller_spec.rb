@@ -9,10 +9,6 @@ describe Api::ScoresController, type: :request do
     @score1 = create(:score, user: @user1, total_score: 79, played_at: '2021-05-20')
     @score2 = create(:score, user: user2, total_score: 99, played_at: '2021-06-20')
     @score3 = create(:score, user: user2, total_score: 68, played_at: '2021-06-13')
-
-    25.times do
-      create(:score, user: @user1, total_score: 79, played_at: '2021-05-20')
-    end
   end
 
   describe 'GET feed' do
@@ -23,7 +19,7 @@ describe Api::ScoresController, type: :request do
       response_hash = JSON.parse(response.body)
       scores = response_hash['scores']
 
-      expect(scores.size).to eq 25
+      expect(scores.size).to eq 3
       expect(scores[0]['user_name']).to eq 'User2'
       expect(scores[0]['total_score']).to eq 99
       expect(scores[0]['played_at']).to eq '2021-06-20'
@@ -110,6 +106,10 @@ describe Api::ScoresController, type: :request do
   end
 
   it 'should allow only 25 scores to appear' do
+    25.times do
+      create(:score, user: @user1, total_score: 79, played_at: '2021-05-20')
+    end
+
     get api_feed_path
 
     expect(response).to have_http_status(:ok)
