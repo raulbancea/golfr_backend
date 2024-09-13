@@ -10,19 +10,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetches all branches and history
       - run: |
-         git fetch --no-tags --prune --recurse-submodules=on-demand origin +refs/pull/*/merge:refs/remotes/pull/*/merge
+          git fetch --no-tags --prune --recurse-submodules=on-demand origin +refs/heads/*:refs/remotes/origin/* +refs/pull/*/merge:refs/remotes/pull/*/merge
+          git checkout ${{ github.base_ref }} # Ensure the base branch (main or develop) is checked out
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0.1'
-      - name: Setup pronto
-        run: gem install 'pronto:0.11.0' 'rubocop:1.27.0' 'pronto-rubocop:0.11.1' 'rubocop-rails:2.14.2' 'rubocop-gitlab-security:0.1.1' pronto-brakeman pronto-fasterer pronto-flay --conservative
+      - name: Setup pronto and faraday-retry
+        run: |
+          gem install 'pronto:0.11.0' 'rubocop:1.27.0' 'pronto-rubocop:0.11.1' 'rubocop-rails:2.14.2' 'rubocop-gitlab-security:0.1.1' pronto-brakeman pronto-fasterer pronto-flay faraday-retry --conservative
       - name: Run Pronto
         run: pronto run -f github_status github_pr -c origin/${{ github.base_ref }}
         env:
           PRONTO_PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
           PRONTO_GITHUB_ACCESS_TOKEN: ${{ github.token }}
+
   tests:
     runs-on: ubuntu-latest
     env:
