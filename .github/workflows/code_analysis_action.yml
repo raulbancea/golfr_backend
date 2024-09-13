@@ -10,11 +10,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Fetches all branches and history
       - run: |
-          git fetch --no-tags --prune --recurse-submodules=on-demand origin +refs/heads/*:refs/remotes/origin/* +refs/pull/*/merge:refs/remotes/pull/*/merge
-          git checkout ${{ github.base_ref }} # Ensure the base branch (main or develop) is checked out
+          git fetch --no-tags --prune --recurse-submodules=on-demand origin +refs/pull/*/merge:refs/remotes/pull/*/merge
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
