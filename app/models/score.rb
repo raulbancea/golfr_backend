@@ -4,7 +4,7 @@
 class Score < ApplicationRecord
   belongs_to :user
 
-  validates :total_score, inclusion: { in: 54..120 }
+  validates :total_score, inclusion: { in: 54..140 }
   validates :number_of_holes, inclusion: { in: 9..18 }
   validate :future_score
 
