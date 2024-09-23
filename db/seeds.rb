@@ -5,26 +5,27 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
-# User.create!(
-#   name: 'George Marcus',
-#   email: 'gmarcus@golfr.com',
-#   password: '123456',
-#   password_confirmation: '123456'
-# )
 
-# User.create!(
-#   name: 'Sergiu Apostu',
-#   email: 'sapostu@golfr.com',
-#   password: '123456',
-#   password_confirmation: '123456'
-# )
+User.create!(
+  name: 'George Marcus',
+  email: 'gmarcus@golfr.com',
+  password: '123456',
+  password_confirmation: '123456'
+)
 
-# User.create!(
-#   name: 'Alex Tandrau',
-#   email: 'atandrau@golfr.com',
-#   password: '123456',
-#   password_confirmation: '123456'
-# )
+User.create!(
+  name: 'Sergiu Apostu',
+  email: 'sapostu@golfr.com',
+  password: '123456',
+  password_confirmation: '123456'
+)
+
+User.create!(
+  name: 'Alex Tandrau',
+  email: 'atandrau@golfr.com',
+  password: '123456',
+  password_confirmation: '123456'
+)
 
 rng = Random.new
 now = Time.zone.today
