@@ -56,8 +56,8 @@ describe Api::ScoresController, type: :request do
       expect(score.played_at.to_s).to eq '2021-06-29'
     end
 
-    it 'should return an error if number of holes is fewer than 9 or more than 18' do
-      invalid_holes = [8, 19] # Invalid hole counts
+    it 'should return a validation error if number of holes is fewer than 9 or more than 18' do
+      invalid_holes = [8, 19]
       invalid_holes.each do |holes|
         post api_scores_path,
              params: {
@@ -74,32 +74,41 @@ describe Api::ScoresController, type: :request do
       end
     end
 
+    it 'should allow posting scores for every valid number of holes from 9 to 18' do
+      valid_holes = (9..18).to_a
+
+      valid_holes.each do |holes|
+        score_count = Score.count
+
+        post api_scores_path,
+             params: {
+               score: {
+                 total_score: 79,
+                 played_at: '2021-06-29',
+                 number_of_holes: holes
+               }
+             }
+
+        expect(response).to have_http_status(:ok)
+        expect(Score.count).to eq score_count + 1
+
+        response_hash = JSON.parse(response.body)
+        score_hash = response_hash['score']
+
+        expect(score_hash['number_of_holes']).to eq holes
+      end
+    end
+
     it 'should return a validation error if score is played in the future' do
       score_count = Score.count
-
-      post api_scores_path,
-           params: {
-             score: {
-               total_score: 79,
-               played_at: '2090-06-29'
-             }
-           }
-
+      post api_scores_path, params: { score: { total_score: 79, played_at: '2090-06-29' }}
       expect(response).not_to have_http_status(:ok)
       expect(Score.count).to eq score_count
     end
 
     it 'should return a validation error if score value is too low' do
       score_count = Score.count
-
-      post api_scores_path,
-           params: {
-             score: {
-               total_score: 10,
-               played_at: '2021-06-29'
-             }
-           }
-
+      post api_scores_path, params: { score: { total_score: 10, played_at: '2021-06-29' }}
       expect(response).not_to have_http_status(:ok)
       expect(Score.count).to eq score_count
     end
@@ -141,3 +150,4 @@ describe Api::ScoresController, type: :request do
       expect(Score.count).to eq score_count
     end
   end
+end
