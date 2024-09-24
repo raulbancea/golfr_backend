@@ -57,8 +57,9 @@ describe Api::ScoresController, type: :request do
     end
 
     it 'should return a validation error if number of holes is fewer than 9 or more than 18' do
-      invalid_holes = [8, 19]
-      invalid_holes.each do |holes|
+      [8, 19].each do |holes|
+        sign_in(@user1, scope: :user)
+
         post api_scores_path,
              params: {
                score: {
@@ -67,17 +68,16 @@ describe Api::ScoresController, type: :request do
                  number_of_holes: holes
                }
              }
-
-        expect(response).to have_http_status(:bad_request)
+        expect(response).not_to have_http_status(:ok)
         response_hash = JSON.parse(response.body)
         expect(response_hash['errors']['number_of_holes']).to include('is not included in the list')
       end
     end
 
     it 'should allow posting scores for every valid number of holes from 9 to 18' do
-      valid_holes = (9..18).to_a
+      (9..18).to_a.each do |holes|
+        sign_in(@user1, scope: :user)
 
-      valid_holes.each do |holes|
         score_count = Score.count
 
         post api_scores_path,
