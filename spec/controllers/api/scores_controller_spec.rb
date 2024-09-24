@@ -32,7 +32,14 @@ describe Api::ScoresController, type: :request do
     it 'should save and return the new score if valid parameters' do
       score_count = Score.count
 
-      post api_scores_path, params: { score: { total_score: 79, played_at: '2021-06-29' }}
+      post api_scores_path,
+           params: {
+             score: {
+               total_score: 79,
+               played_at: '2021-06-29',
+               number_of_holes: 18
+             }
+           }
 
       expect(response).to have_http_status(:ok)
       expect(Score.count).to eq score_count + 1
@@ -49,20 +56,59 @@ describe Api::ScoresController, type: :request do
       expect(score.played_at.to_s).to eq '2021-06-29'
     end
 
+    it 'should return a validation error if number of holes is fewer than 9 or more than 18' do
+      [8, 19].each do |holes|
+        sign_in(@user1, scope: :user)
+
+        post api_scores_path,
+             params: {
+               score: {
+                 total_score: 79,
+                 played_at: '2021-06-29',
+                 number_of_holes: holes
+               }
+             }
+        expect(response).not_to have_http_status(:ok)
+        response_hash = JSON.parse(response.body)
+        expect(response_hash['errors']['number_of_holes']).to include('is not included in the list')
+      end
+    end
+
+    it 'should allow posting scores for every valid number of holes from 9 to 18' do
+      (9..18).to_a.each do |holes|
+        sign_in(@user1, scope: :user)
+
+        score_count = Score.count
+
+        post api_scores_path,
+             params: {
+               score: {
+                 total_score: 79,
+                 played_at: '2021-06-29',
+                 number_of_holes: holes
+               }
+             }
+
+        expect(response).to have_http_status(:ok)
+        expect(Score.count).to eq score_count + 1
+
+        response_hash = JSON.parse(response.body)
+        score_hash = response_hash['score']
+
+        expect(score_hash['number_of_holes']).to eq holes
+      end
+    end
+
     it 'should return a validation error if score is played in the future' do
       score_count = Score.count
-
       post api_scores_path, params: { score: { total_score: 79, played_at: '2090-06-29' }}
-
       expect(response).not_to have_http_status(:ok)
       expect(Score.count).to eq score_count
     end
 
     it 'should return a validation error if score value is too low' do
       score_count = Score.count
-
       post api_scores_path, params: { score: { total_score: 10, played_at: '2021-06-29' }}
-
       expect(response).not_to have_http_status(:ok)
       expect(Score.count).to eq score_count
     end
